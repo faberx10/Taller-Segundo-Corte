@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" font-family="Segoe UI, Arial, sans-serif">
+<rect x="0" y="0" width="960" height="640" rx="14" fill="#ffffff"/>
+<text x="480.0" y="32" text-anchor="middle" font-size="18" font-weight="700" fill="#111827">Consola de mandos ESP32 – Taller Segundo Corte</text>
+<rect x="20" y="270" width="170" height="110" rx="10" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+<text x="105" y="298" text-anchor="middle" font-size="15" font-weight="700" fill="#1e1b4b">PC / Portátil</text>
+<text x="105" y="320" text-anchor="middle" font-size="12" fill="#312e81">Python 3.12 (conda)</text>
+<text x="105" y="338" text-anchor="middle" font-size="12" fill="#312e81">PyBullet</text>
+<text x="105" y="356" text-anchor="middle" font-size="12" fill="#312e81">comun/consola.py</text>
+<line x1="190" y1="325" x2="260" y2="325" stroke="#4b5563" stroke-width="4"/>
+<text x="225" y="313" text-anchor="middle" font-size="11" fill="#374151">USB</text>
+<text x="225" y="347" text-anchor="middle" font-size="10" fill="#374151">COM5</text>
+<text x="225" y="360" text-anchor="middle" font-size="10" fill="#374151">115200</text>
+<rect x="260" y="60" width="180" height="560" rx="10" fill="#1f2937"/>
+<text x="350" y="92" text-anchor="middle" font-size="15" font-weight="700" fill="#f9fafb">ESP32</text>
+<text x="350" y="110" text-anchor="middle" font-size="11" fill="#d1d5db">DevKit 30 pines</text>
+<text x="350" y="316" text-anchor="middle" font-size="11" fill="#9ca3af">ADC1 12 bits</text>
+<text x="350" y="332" text-anchor="middle" font-size="11" fill="#9ca3af">esp_timer 50 Hz</text>
+<text x="350" y="348" text-anchor="middle" font-size="11" fill="#9ca3af">UART0 → tramas</text>
+<text x="350" y="364" text-anchor="middle" font-size="11" fill="#9ca3af">LED GPIO2 = pulsación</text>
+<text x="434" y="124" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO34</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="120" x2="578" y2="120"/>
+<polygon points="578,114 578,126 590,120" fill="#111827"/>
+<polyline points="600,86 600,90 592,95 608,103 592,111 608,119 592,127 608,135 592,143 600,148 600,154"/></g>
+<text x="625" y="92" font-size="10" font-weight="700" fill="#b91c1c">3V3</text>
+<text x="625" y="160" font-size="10" font-weight="700" fill="#111827">GND</text>
+<text x="520" y="112" text-anchor="middle" font-size="11" fill="#374151">cursor</text>
+<text x="690" y="124" font-size="13" font-weight="700" fill="#1d4ed8">Potenciómetro 1 (10 kΩ)</text>
+<text x="434" y="214" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO35</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="210" x2="578" y2="210"/>
+<polygon points="578,204 578,216 590,210" fill="#111827"/>
+<polyline points="600,176 600,180 592,185 608,193 592,201 608,209 592,217 608,225 592,233 600,238 600,244"/></g>
+<text x="625" y="182" font-size="10" font-weight="700" fill="#b91c1c">3V3</text>
+<text x="625" y="250" font-size="10" font-weight="700" fill="#111827">GND</text>
+<text x="520" y="202" text-anchor="middle" font-size="11" fill="#374151">cursor</text>
+<text x="690" y="214" font-size="13" font-weight="700" fill="#1d4ed8">Potenciómetro 2 (10 kΩ)</text>
+<text x="434" y="304" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO32</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="300" x2="578" y2="300"/>
+<polygon points="578,294 578,306 590,300" fill="#111827"/>
+<polyline points="600,266 600,270 592,275 608,283 592,291 608,299 592,307 608,315 592,323 600,328 600,334"/></g>
+<text x="625" y="272" font-size="10" font-weight="700" fill="#b91c1c">3V3</text>
+<text x="625" y="340" font-size="10" font-weight="700" fill="#111827">GND</text>
+<text x="520" y="292" text-anchor="middle" font-size="11" fill="#374151">cursor</text>
+<text x="690" y="304" font-size="13" font-weight="700" fill="#1d4ed8">Potenciómetro 3 (10 kΩ)</text>
+<text x="434" y="394" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO18</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="390" x2="580" y2="390"/>
+<circle cx="584" cy="390" r="4" fill="#ffffff"/><circle cx="626" cy="390" r="4" fill="#ffffff"/>
+<line x1="584" y1="378" x2="626" y2="378"/><line x1="605" y1="378" x2="605" y2="370"/>
+<line x1="630" y1="390" x2="660" y2="390"/><line x1="660" y1="390" x2="660" y2="400"/>
+<line x1="650" y1="400" x2="670" y2="400"/><line x1="654" y1="405" x2="666" y2="405"/><line x1="658" y1="410" x2="662" y2="410"/></g>
+<text x="690" y="394" font-size="13" font-weight="700" fill="#15803d">Pulsador 1</text>
+<text x="434" y="439" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO19</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="435" x2="580" y2="435"/>
+<circle cx="584" cy="435" r="4" fill="#ffffff"/><circle cx="626" cy="435" r="4" fill="#ffffff"/>
+<line x1="584" y1="423" x2="626" y2="423"/><line x1="605" y1="423" x2="605" y2="415"/>
+<line x1="630" y1="435" x2="660" y2="435"/><line x1="660" y1="435" x2="660" y2="445"/>
+<line x1="650" y1="445" x2="670" y2="445"/><line x1="654" y1="450" x2="666" y2="450"/><line x1="658" y1="455" x2="662" y2="455"/></g>
+<text x="690" y="439" font-size="13" font-weight="700" fill="#15803d">Pulsador 2</text>
+<text x="434" y="484" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO21</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="480" x2="580" y2="480"/>
+<circle cx="584" cy="480" r="4" fill="#ffffff"/><circle cx="626" cy="480" r="4" fill="#ffffff"/>
+<line x1="584" y1="468" x2="626" y2="468"/><line x1="605" y1="468" x2="605" y2="460"/>
+<line x1="630" y1="480" x2="660" y2="480"/><line x1="660" y1="480" x2="660" y2="490"/>
+<line x1="650" y1="490" x2="670" y2="490"/><line x1="654" y1="495" x2="666" y2="495"/><line x1="658" y1="500" x2="662" y2="500"/></g>
+<text x="690" y="484" font-size="13" font-weight="700" fill="#15803d">Pulsador 3</text>
+<text x="434" y="529" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO22</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="525" x2="580" y2="525"/>
+<circle cx="584" cy="525" r="4" fill="#ffffff"/><circle cx="626" cy="525" r="4" fill="#ffffff"/>
+<line x1="584" y1="513" x2="626" y2="513"/><line x1="605" y1="513" x2="605" y2="505"/>
+<line x1="630" y1="525" x2="660" y2="525"/><line x1="660" y1="525" x2="660" y2="535"/>
+<line x1="650" y1="535" x2="670" y2="535"/><line x1="654" y1="540" x2="666" y2="540"/><line x1="658" y1="545" x2="662" y2="545"/></g>
+<text x="690" y="529" font-size="13" font-weight="700" fill="#15803d">Pulsador 4</text>
+<text x="434" y="574" font-size="12" font-weight="700" fill="#fde68a" text-anchor="end">GPIO23</text>
+<g stroke="#111827" stroke-width="2" fill="none"><line x1="440" y1="570" x2="580" y2="570"/>
+<circle cx="584" cy="570" r="4" fill="#ffffff"/><circle cx="626" cy="570" r="4" fill="#ffffff"/>
+<line x1="584" y1="558" x2="626" y2="558"/><line x1="605" y1="558" x2="605" y2="550"/>
+<line x1="630" y1="570" x2="660" y2="570"/><line x1="660" y1="570" x2="660" y2="580"/>
+<line x1="650" y1="580" x2="670" y2="580"/><line x1="654" y1="585" x2="666" y2="585"/><line x1="658" y1="590" x2="662" y2="590"/></g>
+<text x="690" y="574" font-size="13" font-weight="700" fill="#15803d">Pulsador 5</text>
+<text x="700" y="628" text-anchor="middle" font-size="10" fill="#6b7280">Pulsadores a GND con pull-up interno (INPUT_PULLUP). Potenciómetros entre 3V3 y GND.</text>
+</svg>

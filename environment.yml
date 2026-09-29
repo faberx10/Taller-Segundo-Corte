@@ -1,0 +1,19 @@
+# Entorno de conda para todo el Taller Segundo Corte (PyBullet ya compilado desde conda-forge)
+# 1) conda env create -f environment.yml
+# 2) conda activate taller
+# 3) pip install --no-deps https://github.com/utiasDSL/gym-pybullet-drones/archive/refs/heads/main.zip
+name: taller
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.12
+  - pybullet
+  - numpy
+  - scipy
+  - matplotlib
+  - pillow
+  - gymnasium
+  - transforms3d
+  - pyserial
+  - pip

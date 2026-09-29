@@ -1,0 +1,8 @@
+.pio/
+.vscode/
+__pycache__/
+# registros de cada sesión (las evidencias van en docs/evidencias)
+*/logs/
+# los videos se suben como adjuntos de GitHub, no al repositorio
+*.mp4
+*.mov
