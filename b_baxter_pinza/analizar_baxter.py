@@ -12,12 +12,14 @@ velocidades) y guarda tres figuras junto al registro:
 Uso:
     python analizar_baxter.py
     python analizar_baxter.py logs/baxter_XXXX.csv
+    python analizar_baxter.py logs/baxter_XXXX.csv --desde 60 --hasta 180   (solo ese tramo)
 """
 
+import argparse
 import csv
 import glob
+import io
 import os
-import sys
 
 import numpy as np
 import matplotlib
@@ -46,8 +48,20 @@ plt.rcParams.update({
 })
 
 
+
+def abrir_csv(ruta):
+    """Abre el registro como texto. Los registros nuevos son UTF-8; los que se
+    grabaron en Windows antes de fijar la codificación están en cp1252."""
+    with open(ruta, "rb") as f:
+        datos = f.read()
+    try:
+        texto = datos.decode("utf-8")
+    except UnicodeDecodeError:
+        texto = datos.decode("cp1252")
+    return io.StringIO(texto, newline="")
+
 def cargar(ruta):
-    with open(ruta, newline="") as f:
+    with abrir_csv(ruta) as f:
         filas = list(csv.DictReader(f))
     datos = {k: [r[k] for r in filas] for k in filas[0]}
     num = {}
@@ -74,8 +88,13 @@ def intervalos(mascara, t):
 
 
 def main():
-    if len(sys.argv) > 1:
-        ruta = sys.argv[1]
+    ap = argparse.ArgumentParser(description="Análisis de una sesión (baxter_*.csv)")
+    ap.add_argument("registro", nargs="?", help="archivo CSV (por defecto, el más reciente de logs/)")
+    ap.add_argument("--desde", type=float, default=None, help="analizar desde este instante (s)")
+    ap.add_argument("--hasta", type=float, default=None, help="analizar hasta este instante (s)")
+    args = ap.parse_args()
+    if args.registro:
+        ruta = args.registro
     else:
         registros = sorted(glob.glob(os.path.join(AQUI, "logs", "baxter_*.csv")))
         if not registros:
@@ -83,6 +102,12 @@ def main():
             return
         ruta = registros[-1]
     d = cargar(ruta)
+    ventana = np.ones(len(d["t_s"]), dtype=bool)
+    if args.desde is not None:
+        ventana &= d["t_s"] >= args.desde
+    if args.hasta is not None:
+        ventana &= d["t_s"] <= args.hasta
+    d = {k: v[ventana] for k, v in d.items()}
     t = d["t_s"]
     dt = float(np.median(np.diff(t)))
     base = os.path.splitext(ruta)[0]

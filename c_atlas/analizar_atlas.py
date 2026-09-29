@@ -11,13 +11,15 @@ dos figuras junto al registro:
 Uso:
     python analizar_atlas.py
     python analizar_atlas.py logs/atlas_XXXX.csv
+    python analizar_atlas.py logs/atlas_XXXX.csv --desde 60 --hasta 180   (solo ese tramo)
 """
 
+import argparse
 import csv
 import glob
+import io
 import os
 import re
-import sys
 
 import numpy as np
 import matplotlib
@@ -47,8 +49,20 @@ plt.rcParams.update({
 })
 
 
+
+def abrir_csv(ruta):
+    """Abre el registro como texto. Los registros nuevos son UTF-8; los que se
+    grabaron en Windows antes de fijar la codificación están en cp1252."""
+    with open(ruta, "rb") as f:
+        datos = f.read()
+    try:
+        texto = datos.decode("utf-8")
+    except UnicodeDecodeError:
+        texto = datos.decode("cp1252")
+    return io.StringIO(texto, newline="")
+
 def cargar(ruta):
-    with open(ruta, newline="") as f:
+    with abrir_csv(ruta) as f:
         filas = list(csv.DictReader(f))
     d = {}
     for k in filas[0]:
@@ -70,8 +84,13 @@ def sombrear(a, modos, t):
 
 
 def main():
-    if len(sys.argv) > 1:
-        ruta = sys.argv[1]
+    ap = argparse.ArgumentParser(description="Análisis de una sesión (atlas_*.csv)")
+    ap.add_argument("registro", nargs="?", help="archivo CSV (por defecto, el más reciente de logs/)")
+    ap.add_argument("--desde", type=float, default=None, help="analizar desde este instante (s)")
+    ap.add_argument("--hasta", type=float, default=None, help="analizar hasta este instante (s)")
+    args = ap.parse_args()
+    if args.registro:
+        ruta = args.registro
     else:
         registros = sorted(glob.glob(os.path.join(AQUI, "logs", "atlas_*.csv")))
         if not registros:
@@ -79,6 +98,12 @@ def main():
             return
         ruta = registros[-1]
     d = cargar(ruta)
+    ventana = np.ones(len(d["t_s"]), dtype=bool)
+    if args.desde is not None:
+        ventana &= d["t_s"] >= args.desde
+    if args.hasta is not None:
+        ventana &= d["t_s"] <= args.hasta
+    d = {k: v[ventana] for k, v in d.items()}
     t = d["t_s"]
     base = os.path.splitext(ruta)[0]
     modos = [m.split(" ")[0] for m in d["modo"]]
@@ -123,6 +148,10 @@ def main():
             a.plot(t, d[f"{n}_obj"] * escala, color=TEXTO_2, lw=1.0, ls="--", label="objetivo (consola)")
             a.plot(t, d[f"{n}_suave"] * escala, color=AZUL, lw=2.0, label="trayectoria suave")
             a.plot(t, d[f"{n}_real"] * escala, color=NARANJA, lw=1.2, label="real")
+            y0, y1 = a.get_ylim()
+            if y1 - y0 < 4:                     # sin movimiento: no ampliar el ruido numérico
+                c = (y0 + y1) / 2
+                a.set_ylim(c - 2, c + 2)
             nombre = ETIQUETA[n] if n in ETIQUETA else n.split("_")[1]
             a.set_ylabel(nombre + (" (x100)" if n == "sentadilla" else " (°)"))
             if fila == 0:

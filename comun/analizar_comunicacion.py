@@ -15,6 +15,7 @@ Uso:
 
 import csv
 import glob
+import io
 import os
 import statistics
 import sys
@@ -24,6 +25,18 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
+
+def abrir_csv(ruta):
+    """Abre el registro como texto. Los registros nuevos son UTF-8; los que se
+    grabaron en Windows antes de fijar la codificación están en cp1252."""
+    with open(ruta, "rb") as f:
+        datos = f.read()
+    try:
+        texto = datos.decode("utf-8")
+    except UnicodeDecodeError:
+        texto = datos.decode("cp1252")
+    return io.StringIO(texto, newline="")
+
 def percentil(datos, q):
     datos = sorted(datos)
     k = (len(datos) - 1) * q / 100
@@ -32,7 +45,7 @@ def percentil(datos, q):
 
 
 def analizar(ruta):
-    with open(ruta, newline="") as f:
+    with abrir_csv(ruta) as f:
         filas = list(csv.DictReader(f))
     if len(filas) < 10:
         print("El registro tiene muy pocas tramas.")

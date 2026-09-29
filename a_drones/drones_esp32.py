@@ -132,7 +132,7 @@ def main():
     hud = Hud(6, cliente, x_ndc=-0.48, y_ndc=0.84) if args.sin_serial else Hud(6, cliente)
 
     # ---- Registro del vuelo ----
-    f_log = open(os.path.join(carpeta_logs, f"vuelo_{marca}.csv"), "w", newline="")
+    f_log = open(os.path.join(carpeta_logs, f"vuelo_{marca}.csv"), "w", newline="", encoding="utf-8")
     log = csv.writer(f_log)
     log.writerow(["t_s", "estado", "destino", "ruta_paso", "altura_obj", "vel_obj", "radio_obj",
                   "ref_x", "ref_y", "ref_z", "centro_x", "centro_y", "centro_z", "error_m", "evento",

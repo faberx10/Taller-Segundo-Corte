@@ -369,7 +369,7 @@ def main():
     hud = Hud(8, cliente, x_ndc=-0.48, y_ndc=0.84, cerca=0.3) if args.sin_serial else Hud(8, cliente, cerca=0.3)
 
     # ---- Registro ----
-    f_log = open(os.path.join(carpeta_logs, f"atlas_{marca}.csv"), "w", newline="")
+    f_log = open(os.path.join(carpeta_logs, f"atlas_{marca}.csv"), "w", newline="", encoding="utf-8")
     log = csv.writer(f_log)
     log.writerow(["t_s", "modo", "brazo", "grupo", "evento"]
                  + [f"{n}_obj" for n in NOMBRES_Q] + [f"{n}_suave" for n in NOMBRES_Q]

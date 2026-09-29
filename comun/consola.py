@@ -92,7 +92,7 @@ class ConsolaESP32(_BaseConsola, threading.Thread):
         self._f_log = None
         if archivo_tramas:
             os.makedirs(os.path.dirname(archivo_tramas), exist_ok=True)
-            self._f_log = open(archivo_tramas, "w", newline="")
+            self._f_log = open(archivo_tramas, "w", newline="", encoding="utf-8")
             self._log = csv.writer(self._f_log)
             self._log.writerow(["t_pc_s", "seq", "t_esp_ms", "pot1", "pot2", "pot3", "botones",
                                 "c1", "c2", "c3", "c4", "c5", "tramas_ok", "tramas_malas",

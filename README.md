@@ -15,7 +15,14 @@ Se construyó **una sola consola de mandos física** con un **ESP32**, 3 potenci
 
 El **firmware es el mismo para los tres incisos**: el ESP32 solo mide y envía. Cada script de Python decide qué significa cada potenciómetro y cada pulsador.
 
-<!-- RESUMEN_RESULTADOS -->
+**Resultados con la consola real** (registros en [`docs/evidencias/`](docs/evidencias)):
+
+| | Resultado |
+|---|---|
+| Comunicación | 12 150 tramas en 240 s, **0 perdidas**; el ESP32 envió exactamente cada **20.00 ms**; latencia de ida y vuelta mediana **7.0 ms** |
+| (a) Drones | 6 llegadas a A, B y C (manual y en ruta automática); el centro de la formación siguió a su referencia con **1.2 cm** de error medio en vuelo y quedó a **≤ 0.3 cm** de cada punto |
+| (b) Baxter | Rutina automática: **2 de 2 bloques** en la bandeja en 21.2 s, los dos agarres al primer intento; pinza real a menos de **2 cm** de su trayectoria el **99 %** del tiempo |
+| (c) Atlas | 12 poses de las demostraciones alcanzadas con error **≤ 0.10°**; **0 caídas**, con el centro de masa siempre a **8.9 cm o más** del borde de los pies |
 
 ---
 
@@ -175,7 +182,7 @@ En pantalla se ven el estado de la misión, el destino, los valores de los poten
 
 ### 2.2 Video de evidencia
 
-VIDEO_INCISO_A
+https://github.com/user-attachments/assets/076b8d02-cc70-4ff7-983d-07e26859b6fe
 
 ### 2.3 Captura
 
@@ -207,11 +214,15 @@ $$v_{k+1} = \min\left(v_k + a_{max}\,\Delta t,\;\; v_{crucero},\;\; \sqrt{2\,a_{
 
 El término $\sqrt{2\,a\,d}$ es la velocidad máxima desde la que todavía se puede frenar en la distancia que falta. Además, la velocidad de la referencia se pasa al PID como **prealimentación** (`target_vel`), así los drones no se quedan atrás de la referencia durante el crucero.
 
-| Tramo | Distancia | Tiempo teórico a 0.5 m/s y 0.4 m/s² |
-|---|---|---|
-| A → B | 1.56 m | 2 × (0.5 / 0.4) + (1.56 − 0.625) / 0.5 = **4.4 s** |
-| B → C | 2.20 m | **5.7 s** |
-| C → A | 1.70 m | **4.6 s** |
+El tiempo de un tramo de longitud $d$ se puede predecir. Acelerar hasta $v$ y frenar ocupa $v^2/a$ metros; si el tramo es más largo, el perfil es trapezoidal:
+
+$$t = \frac{d}{v} + \frac{v}{a}$$
+
+Si el tramo es más corto que $v^2/a$, la formación nunca alcanza la velocidad de crucero y el perfil queda **triangular**, con velocidad pico $\sqrt{a\,d}$ y tiempo
+
+$$t = 2\sqrt{d/a}$$
+
+Con la velocidad al máximo (1.0 m/s) hacen falta 2.5 m para acelerar y frenar, y los tres tramos son más cortos, así que en la prueba real todos los perfiles fueron triangulares (ver la tabla de resultados).
 
 **Formación.** Cada dron tiene un desfase fijo respecto al centro, repartido en un hexágono de radio $r$:
 
@@ -223,7 +234,37 @@ Al girar el potenciómetro 3, el radio no salta: cambia a 0.2 m/s como máximo, 
 
 ### 2.6 Resultados
 
-<!-- RESULTADOS_A -->
+Sesión real con la consola ([`vuelo_20260928_004406.csv`](docs/evidencias/vuelo_20260928_004406.csv)). Primero se voló a mano (B, C y A con los pulsadores), se aterrizó, y luego se lanzó la **ruta automática A → B → C**. La consola estaba en: altura 1.03 m, velocidad 1.0 m/s (máxima) y radio 0.47 m.
+
+![Trayectoria de la formación](docs/evidencias/vuelo_20260928_004406_trayectoria.png)
+
+*Vista superior: cada color es un dron y la línea negra punteada es el centro de la formación. Los seis drones mantienen el hexágono durante todo el recorrido.*
+
+![Misión en el tiempo](docs/evidencias/vuelo_20260928_004406_tiempo.png)
+
+*De arriba abajo: altura, posición x-y del centro, distancia al destino y error de seguimiento. Los colores de fondo son el estado de la misión y las líneas punteadas, las llegadas.*
+
+| Tramo | Modo | Distancia | Tiempo teórico $2\sqrt{d/a}$ | Tiempo medido | Error 1.5 s después de llegar |
+|---|---|---|---|---|---|
+| A → B | Manual (incluye el despegue) | 1.56 m | 3.95 s + despegue | 6.79 s | 0.1 cm |
+| B → C | Manual | 2.20 m | 4.69 s | **4.60 s** | 0.2 cm |
+| C → A | Manual | 1.70 m | 4.12 s | **4.04 s** | 0.2 cm |
+| A → B | Ruta automática | 1.56 m | 3.95 s | **4.02 s** | 0.3 cm |
+| B → C | Ruta automática | 2.20 m | 4.69 s | **4.62 s** | 0.3 cm |
+
+| Métrica (en vuelo) | Resultado |
+|---|---|
+| Error de seguimiento del centro, medio / p95 / máximo | **1.2 / 3.1 / 5.0 cm** |
+| Error en vuelo estacionario | ~0.5 cm |
+| Radio real de la formación frente al pedido | 0.2 cm de diferencia media |
+| Distancia mínima entre dos drones | 45 cm (el lado del hexágono es igual al radio, 47 cm) |
+
+**Observaciones:**
+
+- **Los tiempos medidos coinciden con la teoría del perfil triangular** con menos de 0.1 s de diferencia. Los medidos son un poco menores porque la llegada se marca cuando el centro entra en el círculo de 3 cm, justo antes de detenerse del todo.
+- **El error de seguimiento en crucero es de ~3 cm** y baja a ~0.5 cm en vuelo estacionario. Es el pequeño retraso del PID de posición frente a una referencia que se mueve a casi 1 m/s; la prealimentación de velocidad lo mantiene acotado.
+- **En el despegue y el aterrizaje la diferencia sube a ~15 cm** (se ve en la última gráfica, fondos amarillo y rojo). La referencia sube o baja a 0.4 m/s y los drones la siguen con un retraso de ~0.4 s. Por eso el paso a EN VUELO se da cuando la altura real está a menos de 5 cm del objetivo, no cuando llega la referencia.
+- **La formación no se deforma.** El radio real se mantuvo a 0.2 cm del valor del potenciómetro y ningún par de drones estuvo a menos de 45 cm.
 
 ---
 
@@ -248,7 +289,7 @@ Una esfera de color muestra a dónde apunta la consola, y en pantalla se ven el 
 
 ### 3.2 Video de evidencia
 
-VIDEO_INCISO_B
+https://github.com/user-attachments/assets/4b836b4b-45af-48f4-8171-015a0ba80e16
 
 ### 3.3 Captura
 
@@ -304,7 +345,50 @@ flowchart TD
 
 ### 3.6 Resultados
 
-<!-- RESULTADOS_B -->
+Sesión real con la consola ([`baxter_20260928_025733.csv`](docs/evidencias/baxter_20260928_025733.csv)), analizada entre 60 y 180 s con `python analizar_baxter.py <registro> --desde 60 --hasta 180`:
+
+| Tramo | Qué se hizo |
+|---|---|
+| 63 – 114 s | Control manual de cada brazo, cambio de brazo (pulsador 1) y prueba de abrir/cerrar la pinza (pulsador 2) |
+| 114 – 130 s | Modo espejo: los dos brazos a la vez |
+| 149 – 170 s | **Rutina automática**: los dos bloques a la bandeja |
+| 184 – 185 s | Posición inicial y reinicio de los bloques (pulsador 4 mantenido) |
+
+![Seguimiento de la pinza](docs/evidencias/baxter_20260928_025733_seguimiento.png)
+
+*Objetivo de la consola (gris punteado), trayectoria suave (azul) y posición real de la pinza (naranja) en x, y, z para cada brazo. El fondo gris marca la pinza cerrada.*
+
+![Vista superior de la mesa](docs/evidencias/baxter_20260928_025733_mesa.png)
+
+*Trayectorias de las pinzas (líneas delgadas) y de los bloques (líneas gruesas): los dos bloques terminan dentro de la bandeja.*
+
+![Rapidez y error de seguimiento](docs/evidencias/baxter_20260928_025733_fluidez.png)
+
+| Métrica | Pinza derecha | Pinza izquierda |
+|---|---|---|
+| Error real frente a la trayectoria suave, medio en toda la sesión | **0.47 cm** | **0.39 cm** |
+| Tiempo con error menor de 2 cm | **99.1 %** | **99.6 %** |
+| Error mientras se mueve, medio / p95 | 1.38 / 5.80 cm | 1.26 / 3.83 cm |
+| Rapidez de la trayectoria suave | ≤ 0.25 m/s (límite del suavizador) | ≤ 0.25 m/s |
+
+| Rutina automática | Resultado |
+|---|---|
+| Duración (22 pasos) | **21.2 s** |
+| Agarres | 2 de 2, los dos confirmados **al primer intento** (sin replanificar) |
+| Bloques en la bandeja al final | **2 de 2** |
+
+**Observaciones:**
+
+- **El brazo sigue a la trayectoria suave con precisión de milímetros.** El error de ~0.4 cm que se ve en reposo es el efecto de la gravedad sobre un control de posición con ganancia baja (`positionGain = 0.08`), que es lo que hace que el movimiento sea suave y no rígido.
+- **Hubo dos picos de error, y los dos tienen explicación en el registro:**
+  - A los 77 s, en modo manual, la pinza derecha se llevó rápido hacia el centro (y ≈ 0) y de vuelta al extremo. La pinza real se atrasó hasta 10 cm y lo recuperó en ~1 s. La causa más probable es que cerca del cuerpo el brazo necesita girar mucho el hombro, y esas articulaciones llegan a su velocidad máxima del URDF (1.5 rad/s).
+  - A los 168 s, al pasar al último paso de la rutina ("volver al inicio"), la pinza izquierda se movió a 1.3 m/s durante 0.2 s (error de 11.7 cm). En ese paso el **giro de la muñeca** cambia de golpe del ángulo de agarre a 0°: la posición sí va por la trayectoria suave, pero la orientación no. La mejora propuesta está en la sección 3.7.
+- **El agarre es real.** La sujeción asistida solo se activó cuando los dos dedos estaban apretando el bloque, y los dos se soltaron exactamente al abrir la pinza sobre la bandeja.
+
+### 3.7 Posibles mejoras
+
+- Interpolar también el **giro de la muñeca** con el mismo perfil de velocidad y aceleración, para eliminar el pico que aparece al cambiar de orientación entre pasos de la rutina.
+- Limitar la velocidad cartesiana según la zona del espacio de trabajo (más lento cerca del cuerpo, donde el hombro se satura).
 
 ---
 
@@ -336,7 +420,7 @@ En pantalla se ven el grupo y el brazo activos, el ángulo de cada potenciómetr
 
 ### 4.2 Video de evidencia
 
-VIDEO_INCISO_C
+https://github.com/user-attachments/assets/08dfdf6c-3874-4b2a-a53e-291e1594f1a2
 
 ### 4.3 Captura
 
@@ -394,7 +478,40 @@ $$T = \max\left(0.5\text{ s},\;\; \frac{1.875\,|\Delta q|}{v_{max}},\;\; \sqrt{\
 
 ### 4.6 Resultados
 
-<!-- RESULTADOS_C -->
+Sesión real con la consola ([`atlas_20260929_013630.csv`](docs/evidencias/atlas_20260929_013630.csv)), analizada entre 145 y 240 s con `python analizar_atlas.py <registro> --desde 145 --hasta 240`:
+
+| Tramo | Qué se hizo |
+|---|---|
+| 153 – 169 s | Demostración **SALUDO** (detenida con el pulsador 4 en la pose 7 de 8) |
+| 170 – 212 s | Control manual: codo y muñeca derechos (grupo 3) y piernas, balanceo e inclinación lateral (grupo 4) |
+| 212 – 233 s | Demostración **SENTADILLA** con los brazos al frente (5 de 5 poses) |
+
+![Grados de libertad del Atlas](docs/evidencias/atlas_20260929_013630_articulaciones.png)
+
+*Los 18 grados de libertad: objetivo de la consola (gris punteado), trayectoria suave (azul) y ángulo real (naranja). El fondo naranja claro marca las demostraciones.*
+
+![Equilibrio del Atlas](docs/evidencias/atlas_20260929_013630_equilibrio.png)
+
+*Arriba: posición del centro de masa respecto al centro de los pies. En medio: margen de estabilidad. Abajo: corrección que aplica el control de equilibrio en los tobillos.*
+
+| Métrica | Resultado |
+|---|---|
+| Poses de las demostraciones alcanzadas | **12** (7 del saludo y 5 de la sentadilla) |
+| Error máximo por pose al llegar, medio / peor | **0.05° / 0.10°** |
+| Diferencia entre la trayectoria suave y el ángulo real (16 articulaciones directas) | media 0.02°, máxima 2.5° |
+| Rango usado en manual | codo 0° a −84°, giro de muñeca 0° a 180°, flexión de muñeca 0° a −67°, **sentadilla al máximo** (rodillas a 80°), balanceo −5.7°, torso lateral ±11° |
+| Caídas | **0** |
+| Margen de estabilidad, mínimo / mediano | **8.9 cm / 12.1 cm** (100 % del tiempo por encima de 3 cm) |
+| Inclinación máxima del torso | 3.1° |
+| Corrección máxima de los tobillos | 3.8° adelante-atrás, 3.9° lateral (el límite es 20°) |
+
+**Observaciones:**
+
+- **El movimiento es fluido y preciso.** Las curvas azul y naranja prácticamente se superponen: el robot sigue la trayectoria suave con décimas de grado, y todas las poses de las demostraciones se alcanzaron con menos de 0.1° de error.
+- **La sentadilla es el momento más exigente para el equilibrio.** Con los brazos al frente y el torso inclinado, el centro de masa se adelanta 4.4 cm; el control responde inclinando los tobillos 3.8° y el margen baja de 12 a 9 cm, sin llegar nunca a la zona de riesgo.
+- **El balanceo lateral** (hacia los 204 – 210 s) llevó el centro de masa hasta 6.3 cm hacia un lado; la corrección lateral de los tobillos subió a 3.9° y el margen se mantuvo por encima de 11 cm.
+- **Las correcciones fueron de menos de 4°**, lejos del límite de 20°: el controlador tuvo margen de sobra durante toda la sesión.
+- En esta sesión no se usaron grabar y reproducir poses (pulsadores 3 y 4 para grabar), ni se provocó una caída; esas funciones se describen en la sección 4.1.
 
 ---
 
@@ -407,7 +524,27 @@ Cada vez que se usa la consola real, `ConsolaESP32` guarda **una fila por cada t
 - las tramas **perdidas** (saltos en la secuencia) y **con error** (checksum inválido);
 - la **latencia de ida y vuelta (RTT)**.
 
-<!-- RESULTADOS_COMUNICACION -->
+**Resultados** de la sesión real del inciso (c) ([`tramas_20260929_013630.csv`](docs/evidencias/tramas_20260929_013630.csv)), la más exigente para el PC porque simula el Atlas y el laboratorio completo:
+
+![Validación de la comunicación](docs/evidencias/tramas_20260929_013630_comunicacion.png)
+
+| Métrica | Resultado | Interpretación |
+|---|---|---|
+| Duración | 240.3 s | – |
+| Tramas válidas | **12 150** | Igual al número de secuencias enviadas: la secuencia llegó completa |
+| Tramas perdidas | **0 (0 %)** | Ningún salto en el número de secuencia |
+| Periodo de muestreo del ESP32 | **20.00 ms** (mín = máx = 20.00 ms) | El temporizador `esp_timer` no se retrasó ni una vez |
+| Frecuencia de recepción | **50.0 Hz** en régimen | Lo mismo que envió el ESP32 (el analizador da 50.56 Hz porque cuenta las 135 tramas acumuladas que llegaron juntas al conectar) |
+| Intervalo de llegada al PC | media 20.0 ms, jitter 7.3 ms | El 86 % llegó entre 10 y 30 ms después de la anterior y el 99 % en 40 ms o menos |
+| RTT, mediana / p95 / máx | **7.0 / 20.8 / 41.6 ms** | 238 mediciones |
+| Líneas inválidas | 105, **todas al conectar** | Ninguna durante los 240 s de funcionamiento (ver abajo) |
+
+**Observaciones:**
+
+- **El ESP32 es exacto; la variación aparece en el PC.** Todas las tramas salieron cada 20.00 ms, pero en el PC llegan con ~7 ms de jitter. Windows entrega los datos del conversor USB-serial en paquetes, y el hilo lector de Python comparte el procesador con la simulación del Atlas (que es pesada: calcula el centro de masa de 31 eslabones en cada ciclo). Ninguna trama se pierde por eso.
+- **El RTT es mayor que con un robot sencillo** (la mediana fue 7 ms aquí frente a ~2 ms en la Actividad 5) por la misma razón: el hilo lector espera su turno frente al hilo de la simulación. Aun así, el 99.6 % de las mediciones está por debajo de 30 ms (un periodo y medio de muestreo) y el 93 % por debajo de 20 ms.
+- **Las 105 líneas inválidas se produjeron al conectar.** El script abre el puerto antes de cargar el laboratorio (para avisar enseguida si el COM está ocupado). Durante los segundos de carga, el ESP32 sigue enviando y el búfer de Windows se llena: las primeras líneas llegaron cortadas (checksum inválido) y luego 135 tramas completas de golpe. El contador de inválidas quedó fijo en 105 desde la primera trama válida hasta el final.
+- **Conclusión:** con 0 tramas perdidas en 12 150, un periodo exacto de 20 ms en el origen y una latencia típica de ~3.5 ms en un sentido (la mitad del RTT), **la comunicación es de tiempo real para esta aplicación**: la consola se muestrea mucho más rápido de lo que una mano puede mover una perilla.
 
 ---
 
@@ -511,7 +648,11 @@ python analizar_atlas.py                          # en c_atlas
 python ..\comun\analizar_comunicacion.py logs     # en cualquiera de las tres
 ```
 
-Cada script toma el registro más reciente de `logs/`, imprime un resumen y guarda las gráficas PNG junto al registro.
+Cada script toma el registro más reciente de `logs/`, imprime un resumen y guarda las gráficas PNG junto al registro. También se le puede pasar un archivo y, en los incisos (b) y (c), un tramo de tiempo:
+
+```bash
+python analizar_baxter.py logs\baxter_20260928_025733.csv --desde 60 --hasta 180
+```
 
 ---
 
@@ -822,7 +963,11 @@ Taller-Segundo-Corte/
 ├── docs/
 │   ├── consola.svg                ← diagrama de conexiones
 │   ├── capturas/                  ← capturas de cada inciso
-│   └── evidencias/                ← registros CSV y gráficas de las pruebas
+│   └── evidencias/                ← registros reales de las pruebas y sus gráficas
+│       ├── vuelo_20260928_004406.csv (+ _trayectoria.png, _tiempo.png)
+│       ├── baxter_20260928_025733.csv (+ _seguimiento.png, _mesa.png, _fluidez.png)
+│       ├── atlas_20260929_013630.csv (+ _articulaciones.png, _equilibrio.png)
+│       └── tramas_20260929_013630.csv (+ _comunicacion.png)
 ├── firmware/                      ← proyecto PlatformIO (un solo firmware)
 │   ├── platformio.ini
 │   └── src/main.cpp

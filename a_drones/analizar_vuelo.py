@@ -12,6 +12,8 @@ Uso:
 
 import csv
 import glob
+import math
+import io
 import os
 import sys
 
@@ -26,6 +28,18 @@ ESTADOS = {"EN TIERRA": "#e5e7eb", "DESPEGANDO": "#fde68a", "EN VUELO": "#dbeafe
 N_DRONES = 6
 
 
+
+def abrir_csv(ruta):
+    """Abre el registro como texto. Los registros nuevos son UTF-8; los que se
+    grabaron en Windows antes de fijar la codificación están en cp1252."""
+    with open(ruta, "rb") as f:
+        datos = f.read()
+    try:
+        texto = datos.decode("utf-8")
+    except UnicodeDecodeError:
+        texto = datos.decode("cp1252")
+    return io.StringIO(texto, newline="")
+
 def main():
     if len(sys.argv) > 1:
         ruta = sys.argv[1]
@@ -35,7 +49,7 @@ def main():
             print("No hay registros en logs/. Ejecuta primero drones_esp32.py.")
             return
         ruta = registros[-1]
-    with open(ruta, newline="") as f:
+    with abrir_csv(ruta) as f:
         filas = list(csv.DictReader(f))
     col = lambda k: [float(r[k]) for r in filas]
     t = col("t_s")
@@ -57,7 +71,19 @@ def main():
                   f"error final del centro {float(r['error_m']) * 100:.1f} cm, "
                   f"altura {float(r['centro_z']):.2f} m")
 
+    # Error de seguimiento: centro real de la formación frente a la referencia suave
+    en_vuelo = [r["estado"] == "EN VUELO" for r in filas]
+    seg = [math.dist((float(r["ref_x"]), float(r["ref_y"]), float(r["ref_z"])),
+                     (float(r["centro_x"]), float(r["centro_y"]), float(r["centro_z"]))) * 100 for r in filas]
+    seg_vuelo = sorted(s for s, v in zip(seg, en_vuelo) if v)
+    if seg_vuelo:
+        print(f"Seguimiento en vuelo (|referencia - centro|): medio {sum(seg_vuelo) / len(seg_vuelo):.1f} cm, "
+              f"p95 {seg_vuelo[int(0.95 * (len(seg_vuelo) - 1))]:.1f} cm, máx {seg_vuelo[-1]:.1f} cm")
+
     base = os.path.splitext(ruta)[0]
+    # la gráfica empieza 3 s antes del primer evento (se omite la espera inicial en tierra)
+    t_eventos = [float(r["t_s"]) for r in filas if r["evento"]]
+    t_ini = max(t[0], t_eventos[0] - 3) if t_eventos else t[0]
 
     # ---- Figura 1: trayectoria en el plano XY ----
     fig, ax = plt.subplots(figsize=(7.5, 7))
@@ -81,7 +107,7 @@ def main():
     fig.savefig(base + "_trayectoria.png", dpi=130)
 
     # ---- Figura 2: variables en el tiempo ----
-    fig, ax = plt.subplots(3, 1, figsize=(11, 8), sharex=True)
+    fig, ax = plt.subplots(4, 1, figsize=(11, 10), sharex=True)
     estados = [r["estado"] for r in filas]
     for a in ax:
         inicio = 0
@@ -107,11 +133,14 @@ def main():
 
     ax[2].plot(t, [e * 100 for e in col("error_m")], "k", lw=1.2)
     ax[2].set_ylabel("distancia al destino (cm)")
-    ax[2].set_xlabel("tiempo (s)")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c, alpha=0.6) for c in ESTADOS.values()]
     ax[2].legend(handles, ESTADOS.keys(), loc="upper right", fontsize=8, ncol=4)
+    ax[3].plot(t, seg, "k", lw=1.0)
+    ax[3].set_ylabel("error de seguimiento\n|referencia - centro| (cm)")
+    ax[3].set_xlabel("tiempo (s)")
     for a in ax:
         a.grid(alpha=0.3)
+        a.set_xlim(t_ini, t[-1])
     fig.suptitle("Misión A → B → C (líneas punteadas = llegada a cada punto)")
     fig.tight_layout()
     fig.savefig(base + "_tiempo.png", dpi=130)

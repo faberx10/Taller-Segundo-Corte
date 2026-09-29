@@ -466,7 +466,7 @@ def main():
     hud = Hud(7, cliente, x_ndc=-0.48, y_ndc=0.84) if args.sin_serial else Hud(7, cliente)
 
     # ---- Registro ----
-    f_log = open(os.path.join(carpeta_logs, f"baxter_{marca}.csv"), "w", newline="")
+    f_log = open(os.path.join(carpeta_logs, f"baxter_{marca}.csv"), "w", newline="", encoding="utf-8")
     log = csv.writer(f_log)
     columnas = ["t_s", "modo", "brazo_activo", "paso_rutina", "evento"]
     for lado in BRAZOS:
